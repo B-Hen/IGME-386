@@ -19,8 +19,32 @@
     }
   </style>
 <script>
-    let map = "osm";
-    let layerurl = "https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/Final_01_WFL1/FeatureServer/3";
+
+  let layerDays = ["https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/Final_Covid_19_WFL1/FeatureServer/5", "https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/Final_Covid_19_WFL1/FeatureServer/4", "https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/Final_Covid_19_WFL1/FeatureServer/3", "https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/Final_Covid_19_WFL1/FeatureServer/2"];
+  let layerMonths = ["https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/ny_covid_Cases_Months/FeatureServer/0", "https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/ny_covid_Cases_Colors_Months/FeatureServer/0", "https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/ny_covid_Deaths_Months/FeatureServer/0", "https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/ny_covid_Deaths_Colors_Months/FeatureServer/0"];
+  let layerYears = ["https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/ny_covid_Cases_Years/FeatureServer/0", "https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/ny_covid_Cases_Colors_Years/FeatureServer/0", "https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/ny_covid_Deaths_Years/FeatureServer/0", "https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/ny_covid_Deaths_Colors_Years/FeatureServer/0"];
+
+  function ChangeMap()
+  {
+    map = document.querySelector("#baseMapSelect").value;
+    layerIndex = parseInt(document.querySelector("#layers").value);
+    interval = document.querySelector("#intervals").value;
+    let timeSlider = document.querySelector("#timeSlider").innerHTML = "";
+    let layerURL;
+
+    //check to see what layer to use based on the interval value
+    if(interval == "days")
+    {
+      layerURL = layerDays[layerIndex];
+    }
+    else if(interval == "months")
+    {
+      layerURL = layerMonths[layerIndex];
+    }
+    else if(interval == "years")
+    {
+      layerURL = layerYears[layerIndex];
+    }
 
     require([
       "esri/Map",
@@ -31,7 +55,7 @@
       "esri/widgets/Legend"
     ], (Map, MapView, FeatureLayer, TimeSlider, Expand, Legend) => {
       layer = new FeatureLayer({
-        url: layerurl
+        url: layerURL
       });
 
       map = new Map({
@@ -55,13 +79,13 @@
       });
 
       view.whenLayerView(layer).then((lv) => {
+        console.log(layer.timeInfo.interval);
         // around up the full time extent to full hour
-        timeSlider.fullTimeExtent = layer.timeInfo.fullTimeExtent.expandTo("hours");
+        timeSlider.fullTimeExtent = layer.timeInfo.fullTimeExtent.expandTo(interval);
         timeSlider.stops = {
           interval: layer.timeInfo.interval
         };
       });
-
 
       const legend = new Legend({
         view: view
@@ -75,134 +99,19 @@
       });
       view.ui.add(legendExpand, "top-left");
     });
+  }
 
-    function ChangeBaseMap()
-    {
-        map = document.querySelector("#baseMapSelect").value;
-        let timeSlider = document.querySelector("#timeSlider").innerHTML = "";
-
-        require([
-            "esri/Map",
-            "esri/views/MapView",
-            "esri/layers/FeatureLayer",
-            "esri/widgets/TimeSlider",
-            "esri/widgets/Expand",
-            "esri/widgets/Legend"
-            ], (Map, MapView, FeatureLayer, TimeSlider, Expand, Legend) => {
-            layer = new FeatureLayer({
-                url: layerurl
-            });
-
-            map = new Map({
-                basemap: map,
-                layers: [layer]
-            });
-
-            const view = new MapView({
-                map: map,
-                container: "viewDiv",
-                zoom: 7.5,
-                center: [-75, 43]
-            });
-
-            // time slider widget initialization
-            const timeSlider = new TimeSlider({
-                container: "timeSlider",
-                view: view,
-                timeVisible: true, // show the time stamps on the timeslider
-                loop: true
-            });
-
-            view.whenLayerView(layer).then((lv) => {
-                // around up the full time extent to full hour
-                timeSlider.fullTimeExtent = layer.timeInfo.fullTimeExtent.expandTo("hours");
-                timeSlider.stops = {
-                interval: layer.timeInfo.interval
-                };
-            });
-
-            const legend = new Legend({
-        view: view
-      });
-
-      const legendExpand = new Expand({
-        expandIconClass: "esri-icon-legend",
-        expandTooltip: "Legend",
-        view: view,
-        content: legend,
-        expanded: false
-      });
-      view.ui.add(legendExpand, "top-left");
-        });
-    }
-
-    function ChangeLayer()
-    {
-        map = document.querySelector("#baseMapSelect").value;
-        let timeSlider = document.querySelector("#timeSlider").innerHTML = "";
-        layerurl = document.querySelector("#layers").value;
-
-        require([
-            "esri/Map",
-            "esri/views/MapView",
-            "esri/layers/FeatureLayer",
-            "esri/widgets/TimeSlider",
-            "esri/widgets/Expand",
-            "esri/widgets/Legend"
-            ], (Map, MapView, FeatureLayer, TimeSlider, Expand, Legend) => {
-            layer = new FeatureLayer({
-                url: layerurl
-            });
-
-            map = new Map({
-                basemap: map,
-                layers: [layer]
-            });
-
-            const view = new MapView({
-                map: map,
-                container: "viewDiv",
-                zoom: 7.5,
-                center: [-75, 43]
-            });
-
-            // time slider widget initialization
-            const timeSlider = new TimeSlider({
-                container: "timeSlider",
-                view: view,
-                timeVisible: true, // show the time stamps on the timeslider
-                loop: true
-            });
-
-            view.whenLayerView(layer).then((lv) => {
-                // around up the full time extent to full hour
-                timeSlider.fullTimeExtent = layer.timeInfo.fullTimeExtent.expandTo("hours");
-                timeSlider.stops = {
-                interval: layer.timeInfo.interval
-                };
-            });
-
-            const legend = new Legend({
-        view: view
-      });
-      const legendExpand = new Expand({
-        expandIconClass: "esri-icon-legend",
-        expandTooltip: "Legend",
-        view: view,
-        content: legend,
-        expanded: false
-      });
-      view.ui.add(legendExpand, "top-left");
-        });
-    }
-
+  window.onload = function()
+  {
+    ChangeMap();
+  }
 </script>
 <body>
     <div id="viewDiv"></div>
     <div id="timeSlider"></div>
 </body>
 
-<select id="baseMapSelect" onchange="ChangeBaseMap()">
+<select id="baseMapSelect" onchange="ChangeMap()">
     <option value="osm" selected>Open Street Map</option>
     <option value="satellite">Satellite</option>
     <option value="hybrid">Hybrid</option>
@@ -213,8 +122,16 @@
     <option value="terrain">Terrain</option>
 </select>
 
-<select id="layers" onchange="ChangeLayer()">
-    <option value="https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/Final_01_WFL1/FeatureServer/3" selected>Cases</option>
-    <option value="https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/Final_01_WFL1/FeatureServer/2">Deaths</option>
+<select id="layers" onchange="ChangeMap()">
+    <option value="0" selected>Cases Graduate Symbols</option>
+    <option value="2" >Cases Graduate Colors</option>
+    <option value="1">Deaths Graduate Symbols</option>
+    <option value="3">Deaths Graduate Colors</option>
+</select>
+
+<select id="intervals" onchange="ChangeMap()">
+  <option value="days" selected>Days</option>
+  <option value="months">Months</option>
+  <option value="years">Years</option>
 </select>
 </html>
