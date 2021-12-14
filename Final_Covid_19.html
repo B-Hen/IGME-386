@@ -7,110 +7,18 @@
     <meta name='viewport' content='width=device-width, initial-scale=1'>
 </head>
 <link rel="stylesheet" href="https://js.arcgis.com/4.21/esri/themes/light/main.css" />
+<link rel="stylesheet" href="Final_Covid_19.css"/>
 <script src="https://js.arcgis.com/4.21/"></script>
-<style>
-    html,
-    body,
-    #viewDiv {
-      padding: 0;
-      margin: 0;
-      height: 90%;
-      width: 100%;
-    }
-  </style>
-<script>
+<script src="Final_Covid_19.js"></script>
 
-  let layerDays = ["https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/Final_Covid_19_WFL1/FeatureServer/5", "https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/Final_Covid_19_WFL1/FeatureServer/4", "https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/Final_Covid_19_WFL1/FeatureServer/3", "https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/Final_Covid_19_WFL1/FeatureServer/2"];
-  let layerMonths = ["https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/ny_covid_Cases_Months/FeatureServer/0", "https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/ny_covid_Cases_Colors_Months/FeatureServer/0", "https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/ny_covid_Deaths_Months/FeatureServer/0", "https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/ny_covid_Deaths_Colors_Months/FeatureServer/0"];
-  let layerYears = ["https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/ny_covid_Cases_Years/FeatureServer/0", "https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/ny_covid_Cases_Colors_Years/FeatureServer/0", "https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/ny_covid_Deaths_Years/FeatureServer/0", "https://services2.arcgis.com/RQcpPaCpMAXzUI5g/arcgis/rest/services/ny_covid_Deaths_Colors_Years/FeatureServer/0"];
-
-  function ChangeMap()
-  {
-    map = document.querySelector("#baseMapSelect").value;
-    layerIndex = parseInt(document.querySelector("#layers").value);
-    interval = document.querySelector("#intervals").value;
-    let timeSlider = document.querySelector("#timeSlider").innerHTML = "";
-    let layerURL;
-
-    //check to see what layer to use based on the interval value
-    if(interval == "days")
-    {
-      layerURL = layerDays[layerIndex];
-    }
-    else if(interval == "months")
-    {
-      layerURL = layerMonths[layerIndex];
-    }
-    else if(interval == "years")
-    {
-      layerURL = layerYears[layerIndex];
-    }
-
-    require([
-      "esri/Map",
-      "esri/views/MapView",
-      "esri/layers/FeatureLayer",
-      "esri/widgets/TimeSlider",
-      "esri/widgets/Expand",
-      "esri/widgets/Legend"
-    ], (Map, MapView, FeatureLayer, TimeSlider, Expand, Legend) => {
-      layer = new FeatureLayer({
-        url: layerURL
-      });
-
-      map = new Map({
-        basemap: map,
-        layers: [layer]
-      });
-
-      const view = new MapView({
-        map: map,
-        container: "viewDiv",
-        zoom: 7.5,
-        center: [-75, 43]
-      });
-
-      // time slider widget initialization
-      const timeSlider = new TimeSlider({
-        container: "timeSlider",
-        view: view,
-        timeVisible: true, // show the time stamps on the timeslider
-        loop: true
-      });
-
-      view.whenLayerView(layer).then((lv) => {
-        console.log(layer.timeInfo.interval);
-        // around up the full time extent to full hour
-        timeSlider.fullTimeExtent = layer.timeInfo.fullTimeExtent.expandTo(interval);
-        timeSlider.stops = {
-          interval: layer.timeInfo.interval
-        };
-      });
-
-      const legend = new Legend({
-        view: view
-      });
-      const legendExpand = new Expand({
-        expandIconClass: "esri-icon-legend",
-        expandTooltip: "Legend",
-        view: view,
-        content: legend,
-        expanded: false
-      });
-      view.ui.add(legendExpand, "top-left");
-    });
-  }
-
-  window.onload = function()
-  {
-    ChangeMap();
-  }
-</script>
+<!--Div for the map and timer slider-->
 <body>
     <div id="viewDiv"></div>
     <div id="timeSlider"></div>
 </body>
 
+<!--Drop down for the basemap-->
+<p>Select BaseMap</p>
 <select id="baseMapSelect" onchange="ChangeMap()">
     <option value="osm" selected>Open Street Map</option>
     <option value="satellite">Satellite</option>
@@ -122,13 +30,17 @@
     <option value="terrain">Terrain</option>
 </select>
 
+<!--Drop down for the fields-->
+<p>Select Field</p>
 <select id="layers" onchange="ChangeMap()">
     <option value="0" selected>Cases Graduate Symbols</option>
-    <option value="2" >Cases Graduate Colors</option>
-    <option value="1">Deaths Graduate Symbols</option>
+    <option value="1" >Cases Graduate Colors</option>
+    <option value="2">Deaths Graduate Symbols</option>
     <option value="3">Deaths Graduate Colors</option>
 </select>
 
+<!--Drop down for the interval (time period)-->
+<p>Select Interval</p>
 <select id="intervals" onchange="ChangeMap()">
   <option value="days" selected>Days</option>
   <option value="months">Months</option>
